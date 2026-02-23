@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <title>ProcesATC</title>
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.css"> -->
+    <link rel="stylesheet" href= "{{ url_for('static',filename='styles/dropzone.min.css') }}">
+    <link rel="stylesheet" type="text/css" href= "{{ url_for('static',filename='styles/mainpage.css') }}">
+  </head>
+
+  <style>
+    /* Style for the help button */
+    .help-button {
+      position: fixed;
+      bottom: 20px;       /* Distance from bottom */
+      right: 20px;        /* Distance from right */
+      background-color: #7c7c7c; 
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 40px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .help-button:hover {
+      background-color: #ce120b; /* Darker blue on hover */
+    }
+  </style>
+
+
+  <!-- LOADING SCREEN -->
+  <div class="loadingScreen" style="display: none;">
+      <img src="/static/rubi.png"/>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('procesar').addEventListener('click', function() {
+        document.querySelector('.loadingScreen').style.display = 'flex';
+        document.querySelector('.successScreen').style.display = 'none';
+      });
+    });
+  </script>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="successScreen" style="text-align: center; display: none;">
+    <h1>¡Procesamiento Completo!</h1>
+    <h3>La descarga ha comenzado.</h3>
+    <img style="width: 10%; margin-top: 20px;" src="/static/rubi.png"/>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('procesar').addEventListener('click', () => {
+            // Start polling for download status
+            const interval = setInterval(async () => {
+                try {
+                    const res = await window.fetch(`/download/status`, { cache: 'no-store' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.started) {
+                            document.querySelector('.loadingScreen').style.display = 'none';
+                            document.querySelector('.successScreen').style.display = 'flex';
+                            clearInterval(interval);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Polling error:', err);
+                }
+            }, 500);
+        });
+      });
+  </script>
+
+  <!-- MAIN SCREEN -->
+  <body class="mainBody">
+    <h1 style="text-align: center; font-size: 36px; color: #333; margin-bottom: 20px; text-decoration: underline;">Bienvenid@ a FairPayEngine</h1>
+    <h4 style="text-align: center; font-size: 24px; color: #666; margin-bottom: 40px; margin-left: 20%; margin-right: 20%;">Esta herramienta calcula las diferencias de horas entre los registros de fichaje y los registros de factura</h4>
+    <h4 style="text-align: center; font-size: 18px; color: #f33636; margin-bottom: 40px; margin-left: 20%; margin-right: 20%;">Introduzca los archivos de fichaje (izquierda) y factura (derecha)</h4>
+    <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 40px;">
+      <form action="{{ url_for('upload_pointages') }}" class="dropzone" style="flex: 1; max-width: 400px;"></form>
+      <form action="{{ url_for('upload_invoice') }}" class="dropzone" style="flex: 1; max-width: 400px;"></form>
+    </div>
+    <script src="static/dropzone.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.1/min/dropzone.min.js"></script> -->
+    <button id="procesar" onclick="location.href='/process'" style="display: block; margin: 0 auto; padding: 15px 30px; font-size: 18px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">
+      Procesar
+    </button>
+
+    <!-- Help button -->
+    <button class="help-button" onclick="alert('Guía de uso de ProcesATC:\n\n1. Sube tus archivos ATC usando el área de arrastrar y soltar\n2. Haz clic en Procesar para generar el archivo consolidado\n3. Se creará un Excel con una hoja por cada archivo\n\nRequisitos del archivo:\n- Debe contener una hoja llamada CARATULA ATC\n- La hoja debe tener una tabla de Cuenta de Resultados\n- Los datos a extraer deben estar entre las celdas EBT y AÑO 8+\n\n¿Necesitas ayuda?\nContacta con soporte: innova@rubiautomotive.com')">
+      ?
+    </button>
+
+  </body>
+</html>

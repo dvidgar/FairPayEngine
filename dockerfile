@@ -1,0 +1,17 @@
+# pull official base image
+FROM python:3.12.3 
+# set work directory
+WORKDIR /usr/src/app  
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt /usr/src/app/requirements.txt
+RUN pip install -r requirements.txt
+# copy project
+COPY ./ /usr/src/app/
+# Set permissions for the upload directory
+RUN mkdir -p /usr/src/app/uploads && chmod -R 777 /usr/src/app/uploads
+
+# Expose the port
+EXPOSE 5002
+# Run Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5002", "app:app", "--threads", "4"]
