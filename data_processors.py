@@ -108,24 +108,6 @@ def combine_split_services(df: pd.DataFrame) -> pd.DataFrame:
     # Drop the marked rows
     return df.drop(index=(rows_to_drop))
     
-def calculate_hours_difference(pointage_df: pd.DataFrame, invoice_df: pd.DataFrame, hour_type="normal") -> pd.DataFrame:
-    if hour_type == "normal":
-        ett_column = SERVICE_DURATION
-    elif hour_type == "extra":
-        ett_column = EXT
-    elif hour_type == "plus_de_nocturnidad_unitario":
-        # note that the invoice is in days, not in hours
-        ett_column = NOC
-    else:
-        raise ValueError("Invalid hour type. Must be 'normal', 'extra' or 'plus_de_nocturnidad_unitario'.")
-    
-    total_hours_ett = pointage_df.groupby(NOMBRE_COMPLETO)[ett_column].sum()
-    total_hours_gaesa = invoice_df[invoice_df[CONCEPTO_LINEA_PEDIDO] == hour_type].groupby(NOMBRE_COMPLETO)[CANTIDAD_LINEA_PEDIDO].sum()
-    if hour_type == "plus_de_nocturnidad_unitario":
-        # convert the invoice from days to hours
-        total_hours_gaesa = total_hours_gaesa * 8
-    return (total_hours_ett - total_hours_gaesa).dropna().reset_index(name=f"Horas {hour_type} diferencia").sort_values(f"Horas {hour_type} diferencia", ascending=False).reset_index(drop=True)
-
 # -------------INVOICE PROCESSING FUNCTIONS----------------
 
 def read_clean_invoice(path: str) -> pd.DataFrame:
