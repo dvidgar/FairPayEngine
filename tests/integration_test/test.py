@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from utils import atc_processing
 
+
 class TestExcelIntegration(unittest.TestCase):
     def setUp(self):
         # Paths to example input files and expected output
@@ -32,13 +33,15 @@ class TestExcelIntegration(unittest.TestCase):
 
         # Compare DataFrames (ignore index)
         breakpoint()
-        pd.testing.assert_frame_equal(actual_df.reset_index(drop=True),
-                                      expected_df.reset_index(drop=True))
+        pd.testing.assert_frame_equal(
+            actual_df.reset_index(drop=True), expected_df.reset_index(drop=True)
+        )
 
     def tearDown(self):
         # Clean up output file after test
         if os.path.exists(self.output_file):
             os.remove(self.output_file)
+
 
 if __name__ == "__main__":
     unittest.main()

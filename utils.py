@@ -7,4 +7,3 @@ def clear_dir(path: str) -> None:
     if os.path.exists(path):
         for f in os.listdir(path):
             os.remove(os.path.join(path, f))
-
