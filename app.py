@@ -9,6 +9,7 @@ from flask import (
     send_from_directory,
     after_this_request,
     jsonify,
+    send_file,
 )
 from werkzeug.utils import secure_filename
 from utils import clear_dir
@@ -165,7 +166,7 @@ def process():
         os.remove(OUTPUT_PATH)
         return response
 
-    return send_from_directory("./output", "output.xlsm", as_attachment=True)
+    return send_file(OUTPUT_PATH, as_attachment=True)
 
 
 @app.route("/download/status")

@@ -1,5 +1,5 @@
 # file system constants
-OUTPUT_PATH = "./output/output.xlsm"
+OUTPUT_PATH = "./output/output.xlsx"
 UPLOAD_INVOICE_PATH = "./uploads/invoice"
 UPLOAD_POINTAGES_PATH = "./uploads/pointages"
 UPLOAD_PATHS = [UPLOAD_INVOICE_PATH, UPLOAD_POINTAGES_PATH]
