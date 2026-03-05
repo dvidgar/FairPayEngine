@@ -1,6 +1,22 @@
 from typing import List, Tuple
 
-from constants import *
+from constants import (
+    APELLIDOS,
+    CANTIDAD_LINEA_PEDIDO,
+    CONCEPTO_LINEA_PEDIDO,
+    FECHA,
+    MARCAJE,
+    MARCAJE_1,
+    NOMBRE,
+    NOMBRE_COMPLETO,
+    NOC,
+    SERVICE_DURATION,
+    SERVICE_END,
+    SERVICE_START,
+    EXT,
+    SERVICE_END_TIMES,
+    SERVICE_START_TIMES,
+)
 import pandas as pd
 from typing import List
 from unidecode import unidecode
@@ -157,9 +173,7 @@ def combine_split_services(df: pd.DataFrame) -> pd.DataFrame:
         next_row = df_nans.loc[i + 1]
         # Check if the current row and the next row have the same "Nombre" and consecutive "Fecha"
         if (current_row[NOMBRE_COMPLETO] == next_row[NOMBRE_COMPLETO]) and (
-            (
-                pd.to_datetime(next_row[FECHA]) - pd.to_datetime(current_row[FECHA])
-            ).days
+            (pd.to_datetime(next_row[FECHA]) - pd.to_datetime(current_row[FECHA])).days
             == 1
         ):
             # Combine the rows by taking the first Marcaje and the second Marcaje.1
@@ -228,6 +242,34 @@ def calculate_hours_difference(pointages_df, invoice_df, hour_type="normal"):
     return difference
 
 
+def web_main(
+    pointages_paths: List[str], invoice_path: str
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    pointages_df = add_pointages(pointages_paths)
+    pointages_df = clean_pointages(pointages_df)
+    pointages_df, missing_info = guess_pointages(pointages_df)
+    invoice_df = read_clean_invoice(invoice_path)
+    diff_df = calculate_hours_difference(pointages_df, invoice_df)
+    print("Difference between pointages and invoice, normal hours:")
+    print(diff_df)
+    diff_df_extra = calculate_hours_difference(
+        pointages_df, invoice_df, hour_type="extra"
+    )
+    print("Difference between pointages and invoice, extra hours:")
+    print(diff_df_extra)
+    diff_df_plus_de_nocturnidad_unitario = calculate_hours_difference(
+        pointages_df, invoice_df, hour_type="plus_de_nocturnidad_unitario"
+    )
+    print(
+        "Difference between pointages and invoice, plus de nocturnidad unitario hours:"
+    )
+    print(diff_df_plus_de_nocturnidad_unitario)
+    print("Missing information for pointages with missing service end:")
+    print(missing_info)
+
+    return diff_df, diff_df_extra, diff_df_plus_de_nocturnidad_unitario, missing_info
+
+
 # -------------MAIN----------------
 
 if __name__ == "__main__":
@@ -235,21 +277,6 @@ if __name__ == "__main__":
     from constants import UPLOAD_POINTAGES_PATH, UPLOAD_INVOICE_PATH
 
     pointages_paths = glob.glob(f"{UPLOAD_POINTAGES_PATH}/*.CSV")
-    pointages_df = add_pointages(pointages_paths)
-    pointages_df = clean_pointages(pointages_df)
-    pointages_df, missing_info = guess_pointages(pointages_df)
     invoice_path = glob.glob(f"{UPLOAD_INVOICE_PATH}/*.xlsx")[0]
-    invoice_df = read_clean_invoice(invoice_path)
-    diff_df = calculate_hours_difference(pointages_df, invoice_df)
-    print("Difference between pointages and invoice, normal hours:")
-    print(diff_df)
-    diff_df_extra = calculate_hours_difference(pointages_df, invoice_df, hour_type="extra")
-    print("Difference between pointages and invoice, extra hours:")
-    print(diff_df_extra)
-    diff_df_plus_de_nocturnidad_unitario = calculate_hours_difference(
-        pointages_df, invoice_df, hour_type="plus_de_nocturnidad_unitario"
-    )
-    print("Difference between pointages and invoice, plus de nocturnidad unitario hours:")
-    print(diff_df_plus_de_nocturnidad_unitario)
-    print("Missing information for pointages with missing service end:")
-    print(missing_info)
+
+    web_main(pointages_paths, invoice_path)
