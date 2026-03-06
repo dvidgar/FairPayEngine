@@ -1,4 +1,7 @@
 # file system constants
+import pandas as pd
+
+
 OUTPUT_PATH = "./output/output.xlsx"
 UPLOAD_INVOICE_PATH = "./uploads/invoice"
 UPLOAD_POINTAGES_PATH = "./uploads/pointages"
@@ -23,6 +26,7 @@ HORAS_DIFERENCIA = "Horas diferencia"
 # Business constants
 SERVICE_START_TIMES = ["06:00", "14:00", "22:00"]
 SERVICE_END_TIMES = ["14:00", "22:00", "06:00"]
+MAX_DIFFERENCE_FROM_SCHEDULE = pd.Timedelta(minutes=45)
 
 # New columns for processing
 SERVICE_START = "service_start"

@@ -16,6 +16,7 @@ from constants import (
     EXT,
     SERVICE_END_TIMES,
     SERVICE_START_TIMES,
+    MAX_DIFFERENCE_FROM_SCHEDULE,
 )
 import pandas as pd
 from typing import List
@@ -68,7 +69,6 @@ def clean_pointages(df: pd.DataFrame) -> pd.DataFrame:
     df[NOMBRE_COMPLETO] = df[NOMBRE_COMPLETO].str.replace(r"\s+", " ", regex=True)
     # remove the last space if the name end in a space
     df[NOMBRE_COMPLETO] = df[NOMBRE_COMPLETO].str.strip()
-    # df[NOMBRE_COMPLETO] = df[NOMBRE_COMPLETO].str.replace(r'\s+$', '', regex=True)
     # convert columns to datetime
     df[SERVICE_START] = df[MARCAJE].apply(
         lambda x: (
@@ -90,33 +90,22 @@ def clean_pointages(df: pd.DataFrame) -> pd.DataFrame:
 
 def adjust_pointages_to_scheduled_times(df: pd.DataFrame) -> pd.DataFrame:
     """Adjusts pointage times to the nearest scheduled service times and calculates duration."""
-    # adjust the service_start and service_end to the closest time in service_start and service_end
-    df[SERVICE_START] = df[SERVICE_START].apply(
-        lambda x: (
-            min(
-                SERVICE_START_TIMES,
-                key=lambda t: abs(
-                    pd.to_datetime(x, format="%H:%M")
-                    - pd.to_datetime(t, format="%H:%M")
-                ),
-            )
-            if pd.notna(x)
-            else x
-        )
-    )
-    df[SERVICE_END] = df[SERVICE_END].apply(
-        lambda x: (
-            min(
-                SERVICE_END_TIMES,
-                key=lambda t: abs(
-                    pd.to_datetime(x, format="%H:%M")
-                    - pd.to_datetime(t, format="%H:%M")
-                ),
-            )
-            if pd.notna(x)
-            else x
-        )
-    )
+    # adjust the service_start and service_end to the closest time, with a margin of 1 hour.
+    # If start time is after the start of the pointage period, no adjustment is made.
+    start_times = [pd.to_datetime(t, format="%H:%M") for t in SERVICE_START_TIMES]
+    end_times = [pd.to_datetime(t, format="%H:%M") for t in SERVICE_END_TIMES]
+    for _, t in enumerate(start_times):
+        df.loc[
+            (df[SERVICE_START] >= t - MAX_DIFFERENCE_FROM_SCHEDULE)
+            & (df[SERVICE_START] < t),
+            SERVICE_START,
+        ] = t
+    for _, t in enumerate(end_times):
+        df.loc[
+            (df[SERVICE_END] > t)
+            & (df[SERVICE_END] <= t + MAX_DIFFERENCE_FROM_SCHEDULE),
+            SERVICE_END,
+        ] = t
 
     # Calculate the duration of the service in hours
     df[SERVICE_DURATION] = (
@@ -202,7 +191,6 @@ def read_clean_invoice(path: str) -> pd.DataFrame:
     )
     # remove the last space if the name end in a space
     df[NOMBRE_COMPLETO] = df[NOMBRE_COMPLETO].str.strip()
-    # df[NOMBRE_COMPLETO] = df[NOMBRE_COMPLETO].str.replace(r'\s+$', '', regex=True)
     # Remove useless columns
     df = df[[NOMBRE_COMPLETO, CONCEPTO_LINEA_PEDIDO, CANTIDAD_LINEA_PEDIDO]]
     return df

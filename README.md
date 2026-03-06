@@ -8,12 +8,12 @@ docker build --rm -t webapp-fair-pay-engine .
 
 2. Run container:
 ```bash
-docker run -d -p 5002:5002 webapp-fair-pay-engine:latest
+docker run -d -p 5005:5005 webapp-fair-pay-engine:latest
 ```
 
 3. Access application:
 ```
-http://localhost:5002
+http://localhost:5005
 ```
 
 ## References
