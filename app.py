@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from data_processors import web_main
+from deliverable.data_processors.integrator import web_main
 from flask import (
     Flask,
     render_template,
