@@ -79,10 +79,21 @@ def web_main(
     print(missing_info)
 
     # change service start and end dates to only show the time in pointages_df
-    pointages_df[SERVICE_START] = pd.to_datetime(pointages_df[SERVICE_START], format="%H:%M").dt.time
-    pointages_df[SERVICE_END] = pd.to_datetime(pointages_df[SERVICE_END], format="%H:%M").dt.time
+    pointages_df[SERVICE_START] = pd.to_datetime(
+        pointages_df[SERVICE_START], format="%H:%M"
+    ).dt.time
+    pointages_df[SERVICE_END] = pd.to_datetime(
+        pointages_df[SERVICE_END], format="%H:%M"
+    ).dt.time
 
-    return diff_df, diff_df_extra, diff_df_plus_de_nocturnidad_unitario, missing_info, pointages_df, invoice_df
+    return (
+        diff_df,
+        diff_df_extra,
+        diff_df_plus_de_nocturnidad_unitario,
+        missing_info,
+        pointages_df,
+        invoice_df,
+    )
 
 
 # -------------MAIN----------------
@@ -101,7 +112,9 @@ if __name__ == "__main__":
         output_df[0].to_excel(writer, sheet_name="Normal Hours Difference", index=False)
         output_df[1].to_excel(writer, sheet_name="Extra Hours Difference", index=False)
         output_df[2].to_excel(
-            writer, sheet_name="Plus de Nocturnidad Unitario Hours Difference", index=False
+            writer,
+            sheet_name="Plus de Nocturnidad Unitario Hours Difference",
+            index=False,
         )
         output_df[3].to_excel(writer, sheet_name="Missing Information", index=False)
         output_df[4].to_excel(writer, sheet_name="Fichajes internos", index=False)

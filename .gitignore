@@ -2,7 +2,8 @@
 /uploads/pointages/*
 /uploads/invoice/*
 /output/*
-# Ignore the test file and the __pycache__ directories
-/test.py
-/__pycache__/*
+# Ignore the __pycache__ directories
+__pycache__/*
 data_processors/__pycache__/*
+# Ignore test files
+/test/*

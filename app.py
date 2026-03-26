@@ -134,25 +134,27 @@ def process():
         abort(400, description="No files uploaded")
 
     # Process files
-    diff_df, diff_df_extra, diff_df_plus_de_nocturnidad_unitario, missing_info = (
-        web_main(
-            pointages_paths=[
-                f for f in files if f.endswith(".csv") or f.endswith(".CSV")
-            ],
-            invoice_path=[
-                f for f in files if f.endswith(".xlsm") or f.endswith(".xlsx")
-            ][0],
-        )
+    output_dfs = web_main(
+        pointages_paths=[f for f in files if f.endswith(".csv") or f.endswith(".CSV")],
+        invoice_path=[f for f in files if f.endswith(".xlsm") or f.endswith(".xlsx")][
+            0
+        ],
     )
 
     # Save output
     with pd.ExcelWriter(OUTPUT_PATH, engine="openpyxl") as writer:
-        diff_df.to_excel(writer, index=False, sheet_name="difference normal hours")
-        diff_df_extra.to_excel(writer, index=False, sheet_name="difference extra hours")
-        diff_df_plus_de_nocturnidad_unitario.to_excel(
-            writer, index=False, sheet_name="difference plus de nocturnidad unitario"
+        output_dfs[0].to_excel(
+            writer, sheet_name="Normal Hours Difference", index=False
         )
-        missing_info.to_excel(writer, index=False, sheet_name="missing info")
+        output_dfs[1].to_excel(writer, sheet_name="Extra Hours Difference", index=False)
+        output_dfs[2].to_excel(
+            writer,
+            sheet_name="Plus de Nocturnidad Unitario Hours Difference",
+            index=False,
+        )
+        output_dfs[3].to_excel(writer, sheet_name="Missing Information", index=False)
+        output_dfs[4].to_excel(writer, sheet_name="Fichajes internos", index=False)
+        output_dfs[5].to_excel(writer, sheet_name="Factura recibida", index=False)
 
     download_status["started"] = True
 

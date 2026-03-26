@@ -1,7 +1,6 @@
 # file system constants
 import pandas as pd
 
-
 OUTPUT_PATH = "./output/output.xlsx"
 UPLOAD_INVOICE_PATH = "./uploads/invoice"
 UPLOAD_POINTAGES_PATH = "./uploads/pointages"
