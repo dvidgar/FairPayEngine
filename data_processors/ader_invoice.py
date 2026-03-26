@@ -1,10 +1,11 @@
 """Ader invoice processing module. This module contains functions to read and clean the invoice data, and to calculate the difference in hours between the pointages and the invoice for each employee."""
 
-from deliverable.constants import (
+from constants import (
     CANTIDAD_LINEA_PEDIDO,
     CONCEPTO_LINEA_PEDIDO,
     NOMBRE_COMPLETO,
 )
+from unidecode import unidecode
 
 
 import pandas as pd

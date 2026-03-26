@@ -1,11 +1,11 @@
 """This module contains functions to process the pointage data, which is the raw data of the services performed by the employees. It includes functions to read the pointage files, clean the data, adjust the service times to the scheduled times, and guess missing information."""
 
 import pandas as pd
-
+from unidecode import unidecode
 
 from typing import List, Tuple
 
-from deliverable.constants import (
+from constants import (
     APELLIDOS,
     FECHA,
     MARCAJE,

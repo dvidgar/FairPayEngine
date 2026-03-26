@@ -2,16 +2,18 @@ from typing import List, Tuple
 
 import pandas as pd
 from typing import List
-from deliverable.constants import (
+from constants import (
     CANTIDAD_LINEA_PEDIDO,
     CONCEPTO_LINEA_PEDIDO,
     EXT,
     NOC,
     NOMBRE_COMPLETO,
     SERVICE_DURATION,
+    SERVICE_END,
+    SERVICE_START,
 )
-from deliverable.data_processors.ader_invoice import read_clean_invoice
-from deliverable.data_processors.pointages import (
+from data_processors.ader_invoice import read_clean_invoice
+from data_processors.pointages import (
     add_pointages,
     clean_pointages,
     guess_pointages,
@@ -76,7 +78,11 @@ def web_main(
     print("Missing information for pointages with missing service end:")
     print(missing_info)
 
-    return diff_df, diff_df_extra, diff_df_plus_de_nocturnidad_unitario, missing_info
+    # change service start and end dates to only show the time in pointages_df
+    pointages_df[SERVICE_START] = pd.to_datetime(pointages_df[SERVICE_START], format="%H:%M").dt.time
+    pointages_df[SERVICE_END] = pd.to_datetime(pointages_df[SERVICE_END], format="%H:%M").dt.time
+
+    return diff_df, diff_df_extra, diff_df_plus_de_nocturnidad_unitario, missing_info, pointages_df, invoice_df
 
 
 # -------------MAIN----------------
@@ -88,4 +94,15 @@ if __name__ == "__main__":
     pointages_paths = glob.glob(f"{UPLOAD_POINTAGES_PATH}/*.CSV")
     invoice_path = glob.glob(f"{UPLOAD_INVOICE_PATH}/*.xlsx")[0]
 
-    web_main(pointages_paths, invoice_path)
+    output_df = web_main(pointages_paths, invoice_path)
+
+    # Save to Excel
+    with pd.ExcelWriter("output.xlsx") as writer:
+        output_df[0].to_excel(writer, sheet_name="Normal Hours Difference", index=False)
+        output_df[1].to_excel(writer, sheet_name="Extra Hours Difference", index=False)
+        output_df[2].to_excel(
+            writer, sheet_name="Plus de Nocturnidad Unitario Hours Difference", index=False
+        )
+        output_df[3].to_excel(writer, sheet_name="Missing Information", index=False)
+        output_df[4].to_excel(writer, sheet_name="Fichajes internos", index=False)
+        output_df[5].to_excel(writer, sheet_name="Factura recibida", index=False)
