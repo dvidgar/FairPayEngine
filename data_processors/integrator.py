@@ -1,7 +1,7 @@
-from typing import List, Tuple
+from typing import List
 
 import pandas as pd
-from typing import List
+
 from constants import (
     CANTIDAD_LINEA_PEDIDO,
     CONCEPTO_LINEA_PEDIDO,
@@ -9,18 +9,14 @@ from constants import (
     NOC,
     NOMBRE_COMPLETO,
     SERVICE_DURATION,
-    SERVICE_END,
-    SERVICE_START,
 )
 from data_processors.ader_invoice import read_clean_invoice
-from data_processors.pointages import (
-    add_pointages,
-    clean_pointages,
-    guess_pointages,
-)
+from data_processors.pointages import add_pointages, clean_pointages, guess_pointages
 
 
-def calculate_hours_difference(pointages_df, invoice_df, hour_type="normal"):
+def calculate_hours_difference(
+    pointages_df: pd.DataFrame, invoice_df: pd.DataFrame, hour_type: str = "normal"
+) -> tuple:
     """Calculates the difference in hours between the pointages and the invoice for each employee."""
     # TODO: only working for ader standard invoice
     if hour_type == "normal":
@@ -50,25 +46,29 @@ def calculate_hours_difference(pointages_df, invoice_df, hour_type="normal"):
         .sort_values(f"Horas {hour_type} diferencia", ascending=False)
         .reset_index(drop=True)
     )
-    return difference
+    return difference, total_hours_invoice, total_hours_pointages_df
 
 
-def web_main(
-    pointages_paths: List[str], invoice_path: str
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def web_main(pointages_paths: List[str], invoice_path: str) -> tuple:
     pointages_df = add_pointages(pointages_paths)
     pointages_df = clean_pointages(pointages_df)
     pointages_df, missing_info = guess_pointages(pointages_df)
     invoice_df = read_clean_invoice(invoice_path)
-    diff_df = calculate_hours_difference(pointages_df, invoice_df)
+    diff_df, total_hours_invoice, total_hours_pointages_df = calculate_hours_difference(
+        pointages_df, invoice_df
+    )
     print("Difference between pointages and invoice, normal hours:")
     print(diff_df)
-    diff_df_extra = calculate_hours_difference(
-        pointages_df, invoice_df, hour_type="extra"
+    diff_df_extra, total_hours_invoice_extra, total_hours_pointages_df_extra = (
+        calculate_hours_difference(pointages_df, invoice_df, hour_type="extra")
     )
     print("Difference between pointages and invoice, extra hours:")
     print(diff_df_extra)
-    diff_df_plus_de_nocturnidad_unitario = calculate_hours_difference(
+    (
+        diff_df_plus_de_nocturnidad_unitario,
+        total_hours_invoice_plus_de_nocturnidad_unitario,
+        total_hours_pointages_df_plus_de_nocturnidad_unitario,
+    ) = calculate_hours_difference(
         pointages_df, invoice_df, hour_type="plus_de_nocturnidad_unitario"
     )
     print(
@@ -78,21 +78,17 @@ def web_main(
     print("Missing information for pointages with missing service end:")
     print(missing_info)
 
-    # change service start and end dates to only show the time in pointages_df
-    pointages_df[SERVICE_START] = pd.to_datetime(
-        pointages_df[SERVICE_START], format="%H:%M"
-    ).dt.time
-    pointages_df[SERVICE_END] = pd.to_datetime(
-        pointages_df[SERVICE_END], format="%H:%M"
-    ).dt.time
-
     return (
         diff_df,
         diff_df_extra,
         diff_df_plus_de_nocturnidad_unitario,
         missing_info,
-        pointages_df,
-        invoice_df,
+        total_hours_invoice,
+        total_hours_pointages_df,
+        total_hours_invoice_extra,
+        total_hours_pointages_df_extra,
+        total_hours_invoice_plus_de_nocturnidad_unitario,
+        total_hours_pointages_df_plus_de_nocturnidad_unitario,
     )
 
 
@@ -100,7 +96,8 @@ def web_main(
 
 if __name__ == "__main__":
     import glob
-    from constants import UPLOAD_POINTAGES_PATH, UPLOAD_INVOICE_PATH
+
+    from constants import UPLOAD_INVOICE_PATH, UPLOAD_POINTAGES_PATH
 
     pointages_paths = glob.glob(f"{UPLOAD_POINTAGES_PATH}/*.CSV")
     invoice_path = glob.glob(f"{UPLOAD_INVOICE_PATH}/*.xlsx")[0]

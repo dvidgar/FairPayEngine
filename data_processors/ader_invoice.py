@@ -1,14 +1,9 @@
 """Ader invoice processing module. This module contains functions to read and clean the invoice data, and to calculate the difference in hours between the pointages and the invoice for each employee."""
 
-from constants import (
-    CANTIDAD_LINEA_PEDIDO,
-    CONCEPTO_LINEA_PEDIDO,
-    NOMBRE_COMPLETO,
-)
+import pandas as pd
 from unidecode import unidecode
 
-
-import pandas as pd
+from constants import CANTIDAD_LINEA_PEDIDO, CONCEPTO_LINEA_PEDIDO, NOMBRE_COMPLETO
 
 
 def read_clean_invoice(path: str) -> pd.DataFrame:

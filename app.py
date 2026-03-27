@@ -1,25 +1,27 @@
+import glob
 import os
+
 import pandas as pd
-from data_processors.integrator import web_main
 from flask import (
     Flask,
-    render_template,
-    request,
     abort,
-    send_from_directory,
     after_this_request,
     jsonify,
+    render_template,
+    request,
     send_file,
+    send_from_directory,
 )
 from werkzeug.utils import secure_filename
-from utils import clear_dir
-import glob
+
 from constants import (
     OUTPUT_PATH,
     UPLOAD_INVOICE_PATH,
-    UPLOAD_POINTAGES_PATH,
     UPLOAD_PATHS,
+    UPLOAD_POINTAGES_PATH,
 )
+from data_processors.integrator import web_main
+from utils import clear_dir
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100 MB limit
@@ -153,8 +155,28 @@ def process():
             index=False,
         )
         output_dfs[3].to_excel(writer, sheet_name="Missing Information", index=False)
-        output_dfs[4].to_excel(writer, sheet_name="Fichajes internos", index=False)
-        output_dfs[5].to_excel(writer, sheet_name="Factura recibida", index=False)
+        output_dfs[4].to_excel(
+            writer, sheet_name="Total Hours Invoice Normal", index=True
+        )
+        output_dfs[5].to_excel(
+            writer, sheet_name="Total Hours Pointages Normal", index=True
+        )
+        output_dfs[6].to_excel(
+            writer, sheet_name="Total Hours Invoice Extra", index=True
+        )
+        output_dfs[7].to_excel(
+            writer, sheet_name="Total Hours Pointages Extra", index=True
+        )
+        output_dfs[8].to_excel(
+            writer,
+            sheet_name="Total Hours Invoice Plus de Nocturnidad Unitario",
+            index=True,
+        )
+        output_dfs[9].to_excel(
+            writer,
+            sheet_name="Total Hours Pointages Plus de Nocturnidad Unitario",
+            index=True,
+        )
 
     download_status["started"] = True
 
